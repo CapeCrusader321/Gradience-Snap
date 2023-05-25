@@ -42,6 +42,7 @@ parts:
       - --prefix=/snap/gradience/current/usr
     build-packages:
       - build-essential
+      - python3-lxml
     override-pull: |
       craftctl default
       craftctl set version=$(git describe --tags --abbrev=0)
