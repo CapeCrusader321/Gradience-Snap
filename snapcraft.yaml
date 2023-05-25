@@ -43,6 +43,7 @@ parts:
     build-packages:
       - build-essential
       - python3-lxml
+      - python3-all-dev
     override-pull: |
       craftctl default
       craftctl set version=$(git describe --tags --abbrev=0)
