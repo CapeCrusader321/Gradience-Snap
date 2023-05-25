@@ -1,1 +1,56 @@
+name: gradience
+base: core22
+adopt-info: gradience
+grade: stable
+confinement: strict
+compression: lzo
+architectures:
+  - build-on: amd64
+    build-for: amd64
 
+environment:
+  # WORKAROUND: Add python modules in Snap to search path
+  PYTHONPATH: ${SNAP}/lib/python3.10/site-packages:${SNAP}/usr/lib/python3/dist-packages
+
+slots:
+  gradience:
+    interface: dbus
+    bus: session
+    name: com.github.GradienceTeam.Gradience
+  
+apps:
+  gradience:
+    command: usr/bin/gradience
+    extensions: [gnome]
+    plugs:
+      - home
+      - audio-playback
+      - network
+      - network-status
+      - network-bind
+      - optical-drive
+      - removable-media
+    common-id: com.github.GradienceTeam.Gradience
+    desktop: usr/share/applications/com.github.GradienceTeam.Gradience.desktop.in
+        
+parts:
+  gradience:
+    source: https://github.com/GradienceTeam/Gradience.git
+    plugin: meson
+    parse-info: [usr/share/metainfo/com.github.GradienceTeam.Gradience.appdata.xml]
+    meson-parameters:
+      - --prefix=/snap/gradience/current/usr
+    build-packages:
+      - build-essential
+    override-pull: |
+      craftctl default
+      craftctl set version=$(git describe --tags --abbrev=0)
+      sed -e 's|Icon=com.github.GradienceTeam.Gradience|Icon=${SNAP}/usr/share/icons/hicolor/scalable/apps/com.github.GradienceTeam.Gradience.svg|' -i data/com.github.GradienceTeam.Gradience.desktop.in.in
+    override-build: |
+      craftctl default
+      # WORKAROUND: Use python from search path, the path detected by meson doesn't exist when running the Snap
+      sed -e '1c#!/usr/bin/env python3' -i ${CRAFT_PART_INSTALL}/snap/gradience/current/usr/bin/gradience
+    organize:
+      snap/gradience/current/usr: usr  
+    
+ 
